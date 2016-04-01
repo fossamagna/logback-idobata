@@ -58,7 +58,7 @@ public class IdobataAppenderTest {
     appender.doAppend(event);
     appender.stop();
     
-    assertThat(new String(outputStream.toByteArray(), enc), is(URLEncoder.encode("log message." + CoreConstants.LINE_SEPARATOR, enc)));
+    assertThat(new String(outputStream.toByteArray(), enc), is("source=" + URLEncoder.encode("log message." + CoreConstants.LINE_SEPARATOR, enc)));
   
     verify(connection).setDoOutput(true);
     verify(connection).setRequestMethod("POST");

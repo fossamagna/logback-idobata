@@ -1,6 +1,8 @@
 package com.github.fossamagna.logback.idobata;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -39,29 +41,54 @@ public class IdobataAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
       addError("Error posting log to Idobata", e);
     }
   }
-  
+
   protected void postMessage(String message, boolean html) throws IOException {
     HttpURLConnection connection = (HttpURLConnection) endpointUrl.openConnection();
     connection.setDoOutput(true);
     connection.setRequestMethod("POST");
-    final String encodedMessage = URLEncoder.encode(message, ENCODE);
-    final byte[] content = encodedMessage.getBytes(ENCODE);
+    
+    StringBuilder body = new StringBuilder();
+    if (html) {
+      body.append("format=html&");
+    }
+    body.append("source=").append(URLEncoder.encode(message, ENCODE));
+    final byte[] content = body.toString().getBytes(ENCODE);
     connection.setFixedLengthStreamingMode(content.length);
     connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-    
     OutputStream out = null;
+    InputStream in = null;
     try {
       out = connection.getOutputStream();
-      if (html) {
-        out.write("format=html&".getBytes(ENCODE));
-      }
       out.write(content);
       out.flush();
+      
+      final int status = connection.getResponseCode();
+      final String encoding = connection.getContentEncoding();
+      if (status < 400) {
+        in = connection.getInputStream();
+        toString(in, encoding);
+      } else {
+        in = connection.getErrorStream();
+        addError("Error posting log to Idobata:" + toString(in, encoding));
+      }
     } finally {
       if (out != null) {
         out.close();
       }
+      if (in != null) {
+        in.close();
+      }
     }
+  }
+  
+  String toString(InputStream in, String encoding) throws IOException {
+    ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
+    byte[] buffer = new byte[1024];
+    int count = -1;
+    while ((count = in.read(buffer, 0, buffer.length)) != -1) {
+      responseBody.write(buffer, 0, count);
+    }
+    return responseBody.toString(encoding != null ? encoding : "UTF-8");
   }
 
   public URL getEndpointUrl() {

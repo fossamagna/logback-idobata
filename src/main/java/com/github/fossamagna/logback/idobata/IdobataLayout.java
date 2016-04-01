@@ -28,7 +28,7 @@ public class IdobataLayout extends LayoutBase<ILoggingEvent> {
     Map<Integer, String> levelToBackgroundColor = new HashMap<Integer, String>();
     levelToBackgroundColor.put(Level.TRACE_INTEGER, "blue");
     levelToBackgroundColor.put(Level.DEBUG_INTEGER, "green");
-    levelToBackgroundColor.put(Level.INFO_INTEGER, "");
+    levelToBackgroundColor.put(Level.INFO_INTEGER, "lightgrey");
     levelToBackgroundColor.put(Level.WARN_INTEGER, "orange");
     levelToBackgroundColor.put(Level.ERROR_INTEGER, "red");
     DEFAULT_LEVEL_TO_BACKGROUND_COLOR = Collections.unmodifiableMap(levelToBackgroundColor);

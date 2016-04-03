@@ -2,12 +2,31 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 sourceCompatibility = 1.6
+description = 'logback-idobata is simple logback appender for Idobata'
+group = 'com.github.fossamagna'
 version = '1.0.0'
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from "${buildDir}/docs/javadoc"
+}
+
+task sourcesJar(type: Jar) {
+  from sourceSets.main.allSource
+  classifier = 'sources'
+}
+
 jar {
   manifest {
     attributes 'Implementation-Title': 'Logback Idobata',
                'Implementation-Version': version
   }
+}
+
+artifacts {
+  archives jar
+  archives javadocJar
+  archives sourcesJar
 }
 
 repositories {

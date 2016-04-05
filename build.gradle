@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'net.researchgate:gradle-release:2.3.4'
+    classpath 'net.researchgate:gradle-release:2.3.5'
   }
 }
 

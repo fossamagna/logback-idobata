@@ -1,0 +1,58 @@
+apply plugin: 'signing'
+apply plugin: 'maven'
+
+boolean validProperty(propertyName) {
+  try { project.property(propertyName) != null }
+  catch (MissingPropertyException) { false }
+}
+
+assert validProperty('signing.keyId'),             'properties for signing must be provided'
+assert validProperty('signing.secretKeyRingFile'), 'properties for signing must be provided'
+assert validProperty('sonatypeUsername'),          'properties for publish must be provided'
+assert validProperty('sonatypeFullname'),          'properties for publish must be provided'
+
+String askPassword(prompt) {
+  "${System.console().readPassword(prompt)}"
+}
+
+ext.'signing.password' = askPassword("Enter password for PGP key ${property('signing.keyId')}: ")
+ext.'sonatypePassword' = askPassword("Enter password for ${sonatypeUsername}@oss.sonatype.org: ")
+
+signing {
+  sign configurations.archives
+}
+
+ext.repositoryUrl = isReleaseVersion ? 'https://oss.sonatype.org/service/local/staging/deploy/maven2' : 'https://oss.sonatype.org/content/repositories/snapshots'
+
+uploadArchives {
+  repositories.mavenDeployer {
+    repository(url: repositoryUrl) {
+      authentication(userName: sonatypeUsername, password: sonatypePassword)
+    }
+    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+    pom.project {
+      name 'Logback Idobata'
+      packaging 'jar'
+      description project.description
+      url 'https://github.com/fossamagna/logback-idobata'
+      scm {
+        url 'git@github.com:fossamagna/logback-idobata.git'
+        connection 'scm:git:git@github.com:fossamagna/logback-idobata.git'
+        developerConnection 'scm:git:git@github.com:fossamagna/logback-idobata.git'
+      }
+      licenses {
+        license {
+          name 'The Apache Software License, Version 2.0'
+          url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          distribution 'repo'
+        }
+      }
+      developers {
+        developer {
+          id sonatypeUsername
+          name sonatypeFullname
+        }
+      }
+    }
+  }
+}

@@ -2,6 +2,7 @@ plugins {
   id 'java'
   id 'eclipse'
   id 'jacoco'
+  id 'com.github.kt3k.coveralls' version '2.6.3'
   id 'net.researchgate.release' version '2.3.5'
 }
 
@@ -10,6 +11,13 @@ description = 'logback-idobata is simple logback appender for Idobata'
 group = 'com.github.fossamagna'
 version = version
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+jacocoTestReport {
+  reports {
+    xml.enabled = true
+    html.enabled = true
+  }
+}
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
   classifier = 'javadoc'

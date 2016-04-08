@@ -1,5 +1,8 @@
 language: java
 
+after_success:
+  - ./gradlew jacocoTestReport coveralls
+
 notifications:
   webhooks:
     urls:

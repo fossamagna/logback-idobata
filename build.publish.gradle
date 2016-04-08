@@ -1,5 +1,7 @@
-apply plugin: 'signing'
-apply plugin: 'maven'
+plugins {
+  id 'maven'
+  id 'signing'
+}
 
 boolean validProperty(propertyName) {
   try { project.property(propertyName) != null }

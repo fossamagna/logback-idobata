@@ -42,8 +42,10 @@ artifacts {
   archives sourcesJar
 }
 
-if (gradle.startParameter.taskNames.contains('uploadArchives')) {
-  apply from: 'build.publish.gradle'
+gradle.taskGraph.whenReady { taskGraph ->
+  if (gradle.taskGraph.hasTask('uploadArchives')) {
+    apply from: 'build.publish.gradle'
+  }
 }
 
 repositories {

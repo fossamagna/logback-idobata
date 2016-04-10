@@ -1,4 +1,4 @@
-# Logback appender for Idobata [![Build Status][travis-image]][travis-url] [![Maven Central][maven-central-image]][maven-central-url]
+# Logback appender for Idobata [![Build Status][travis-image]][travis-url] [![Maven Central][maven-central-image]][maven-central-url] [![Coverage Status][coveralls-image]][coveralls-url]
 
 > logback-idobata is simple logback appender for [Idobata](https://idobata.io/).
 
@@ -53,3 +53,5 @@ logback-idobata is Open Source software released under the [Apache 2.0 license](
 [travis-url]:https://travis-ci.org/fossamagna/logback-idobata
 [maven-central-image]:https://maven-badges.herokuapp.com/maven-central/com.github.fossamagna/logback-idobata/badge.svg
 [maven-central-url]:https://maven-badges.herokuapp.com/maven-central/com.github.fossamagna/logback-idobata
+[coveralls-image]:https://coveralls.io/repos/github/fossamagna/logback-idobata/badge.svg?branch=master
+[coveralls-url]:https://coveralls.io/github/fossamagna/logback-idobata?branch=master

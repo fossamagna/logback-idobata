@@ -1,6 +1,7 @@
 package com.github.fossamagna.logback.idobata;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,7 +15,7 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
 
 /**
  * Logback appendar for Idobata.
- * 
+ *
  * Appender send the same request that you run the following command.
  * <pre>
  * curl --data-urlencode "source='logging event object'" -d format=html https://idobata.io/hook/custom/TOKEN
@@ -22,15 +23,15 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
  * @author fossamagna
  */
 public class IdobataAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
-  
+
   private static final String ENCODE = "UTF-8";
 
   private URL endpointUrl;
-  
+
   private Layout<ILoggingEvent> layout = new IdobataLayout();
-  
+
   private boolean html = true;
-  
+
   @Override
   protected void append(ILoggingEvent eventObject) {
     String message = layout.doLayout(eventObject);
@@ -46,7 +47,7 @@ public class IdobataAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
     HttpURLConnection connection = (HttpURLConnection) endpointUrl.openConnection();
     connection.setDoOutput(true);
     connection.setRequestMethod("POST");
-    
+
     StringBuilder body = new StringBuilder();
     if (html) {
       body.append("format=html&");
@@ -61,7 +62,7 @@ public class IdobataAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
       out = connection.getOutputStream();
       out.write(content);
       out.flush();
-      
+
       final int status = connection.getResponseCode();
       final String encoding = connection.getContentEncoding();
       if (status < 400) {
@@ -72,15 +73,17 @@ public class IdobataAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
         addError("Error posting log to Idobata:" + toString(in, encoding));
       }
     } finally {
-      if (out != null) {
-        out.close();
-      }
-      if (in != null) {
-        in.close();
-      }
+      close(out);
+      close(in);
     }
   }
-  
+
+  private void close(Closeable closeable) throws IOException {
+    if (closeable != null) {
+      closeable.close();
+    }
+  }
+
   String toString(InputStream in, String encoding) throws IOException {
     ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
     byte[] buffer = new byte[1024];

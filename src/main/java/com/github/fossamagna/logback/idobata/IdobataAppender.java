@@ -38,7 +38,6 @@ public class IdobataAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
     try {
       postMessage(message, html);
     } catch (IOException e) {
-      e.printStackTrace();
       addError("Error posting log to Idobata", e);
     }
   }

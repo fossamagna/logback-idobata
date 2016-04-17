@@ -10,9 +10,9 @@ import java.util.Map;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
-import ch.qos.logback.classic.spi.StackTraceElementProxy;
-import ch.qos.logback.core.CoreConstants;
+import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.LayoutBase;
+import ch.qos.logback.core.helpers.Transform;
 
 /**
  * Default Layout for Idobata
@@ -47,21 +47,21 @@ public class IdobataLayout extends LayoutBase<ILoggingEvent> {
   private DateFormat dateFormat = DEFAULT_DATEFORMAT;
 
   /**
-   * 
+   * {@inheritDoc}
    */
   @Override
   public String doLayout(ILoggingEvent event) {
     StringBuilder buffer = new StringBuilder();
     buffer.append("<p>");
-    buffer.append(format(event.getTimeStamp()));
+    buffer.append(Transform.escapeTags(format(event.getTimeStamp())));
     buffer.append(" ");
     level(event, buffer);
     buffer.append(" [");
-    buffer.append(event.getThreadName());
+    buffer.append(Transform.escapeTags(event.getThreadName()));
     buffer.append("] ");
-    buffer.append(event.getLoggerName());
+    buffer.append(Transform.escapeTags(event.getLoggerName()));
     buffer.append(" - ");
-    buffer.append("<b>").append(event.getFormattedMessage()).append("</b>");
+    buffer.append("<b>").append(Transform.escapeTags(event.getFormattedMessage())).append("</b>");
     stacktrace(event, buffer);
     buffer.append("</p>");
     return buffer.toString();
@@ -74,11 +74,11 @@ public class IdobataLayout extends LayoutBase<ILoggingEvent> {
   String toBackgroundColor(Level level) {
     return levelToBackgroundColor.get(level.toInt());
   }
-  
+
   String toColor(Level level) {
     return levelToColor.get(level.toInt());
   }
-  
+
   void level(ILoggingEvent event, StringBuilder buffer) {
     Level level = event.getLevel();
     buffer.append(String.format(
@@ -88,18 +88,13 @@ public class IdobataLayout extends LayoutBase<ILoggingEvent> {
         level)
     );
   }
-  
+
   void stacktrace(ILoggingEvent event, StringBuilder buffer) {
     IThrowableProxy tp = event.getThrowableProxy();
     if (tp != null) {
-        StackTraceElementProxy[] stepArray = tp.getStackTraceElementProxyArray();
-        buffer.append("<pre lang=\"java\"><code>");
-        for (StackTraceElementProxy step : stepArray) {
-          buffer.append(CoreConstants.TAB);
-          buffer.append(step.toString());
-          buffer.append("\n");
-        }
-        buffer.append("</code></pre>");
+      buffer.append("<pre lang=\"java\"><code>");
+      buffer.append(ThrowableProxyUtil.asString(tp));
+      buffer.append("</code></pre>");
     }
   }
 

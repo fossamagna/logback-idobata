@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Properties;
 import java.util.TimeZone;
 
 import org.junit.Before;
@@ -44,6 +45,7 @@ public class IdobataLayoutTest {
     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     df.setTimeZone(TimeZone.getTimeZone("UTC"));
     layout.setDateFormat(df);
+    layout.setOutputSystemProperties(false);
   }
 
   @Test
@@ -76,6 +78,23 @@ public class IdobataLayoutTest {
     assertThat(buffer.toString(), is(expected));
 
     verify(tp).getStackTraceElementProxyArray();
+  }
+  
+  @Test
+  public void testSystemProperties() {
+    Properties properties = new Properties();
+    properties.setProperty("key-1", "value-1");
+    properties.setProperty("key-2", "value-2");
+    StringBuilder buffer = new StringBuilder();
+    layout.setOutputSystemProperties(true);
+    layout = spy(layout);
+    doReturn(properties).when(layout).getSystemProperties();
+    layout.systemProperties(buffer);
+
+    final String expected = "<table style=\"table-layout: fixed; width: 100%;\"><caption>System Properties</caption><thead><tr><th>key</th><th>value</th></tr></thead><tbody><tr><td>key-1</td><td>value-1</td></tr><tr><td>key-2</td><td>value-2</td></tr></tbody></table>";
+    assertThat(buffer.toString(), is(expected));
+
+    verify(layout).getSystemProperties();
   }
 
   @Test
@@ -110,5 +129,12 @@ public class IdobataLayoutTest {
     thrown.expect(IllegalArgumentException.class);
     thrown.expectMessage("Level must not be null.");
     layout.setBackgroundColor(null, "lightgrey");
+  }
+
+  @Test
+  public void testOutputSystemProperties() {
+    assertThat(layout.isOutputSystemProperties(), is(false));
+    layout.setOutputSystemProperties(true);
+    assertThat(layout.isOutputSystemProperties(), is(true));
   }
 }

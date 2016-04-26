@@ -46,7 +46,7 @@ artifacts {
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
-  if (taskGraph.allTasks.any { it instanceof Sign }) {
+  if (isReleaseVersion && taskGraph.allTasks.any { it instanceof Sign }) {
     assert validProperty('signing.keyId'),             'properties for signing must be provided'
     assert validProperty('signing.secretKeyRingFile'), 'properties for signing must be provided'
     def password = askPassword("Enter password for PGP key ${property('signing.keyId')}: ")

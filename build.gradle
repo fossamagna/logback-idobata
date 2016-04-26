@@ -13,7 +13,8 @@ description = 'logback-idobata is simple logback appender for Idobata'
 group = 'com.github.fossamagna'
 version = version
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-ext."sonatypePassword" = null;
+ext.sonatypeUsername = null;
+ext.sonatypePassword = null;
 
 jacocoTestReport {
   reports {

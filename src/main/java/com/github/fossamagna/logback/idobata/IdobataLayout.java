@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -19,11 +22,11 @@ import ch.qos.logback.core.helpers.Transform;
  * @author fossamagna
  */
 public class IdobataLayout extends LayoutBase<ILoggingEvent> {
-  
+
   private static final Map<Integer, String> DEFAULT_LEVEL_TO_BACKGROUND_COLOR;
   private static final Map<Integer, String> DEFAULT_LEVEL_TO_COLOR;
   private static final DateFormat DEFAULT_DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-  
+
   static {
     Map<Integer, String> levelToBackgroundColor = new HashMap<Integer, String>();
     levelToBackgroundColor.put(Level.TRACE_INTEGER, "blue");
@@ -32,7 +35,7 @@ public class IdobataLayout extends LayoutBase<ILoggingEvent> {
     levelToBackgroundColor.put(Level.WARN_INTEGER, "orange");
     levelToBackgroundColor.put(Level.ERROR_INTEGER, "red");
     DEFAULT_LEVEL_TO_BACKGROUND_COLOR = Collections.unmodifiableMap(levelToBackgroundColor);
-    
+
     Map<Integer, String> levelToColor = new HashMap<Integer, String>();
     levelToColor.put(Level.TRACE_INTEGER, "white");
     levelToColor.put(Level.DEBUG_INTEGER, "white");
@@ -41,10 +44,11 @@ public class IdobataLayout extends LayoutBase<ILoggingEvent> {
     levelToColor.put(Level.ERROR_INTEGER, "white");
     DEFAULT_LEVEL_TO_COLOR = Collections.unmodifiableMap(levelToColor);
   }
-  
+
   private Map<Integer, String> levelToBackgroundColor = new HashMap<Integer, String>(DEFAULT_LEVEL_TO_BACKGROUND_COLOR);
   private Map<Integer, String> levelToColor = new HashMap<Integer, String>(DEFAULT_LEVEL_TO_COLOR);
   private DateFormat dateFormat = DEFAULT_DATEFORMAT;
+  private boolean outputSystemProperties = true;
 
   /**
    * {@inheritDoc}
@@ -63,10 +67,11 @@ public class IdobataLayout extends LayoutBase<ILoggingEvent> {
     buffer.append(" - ");
     buffer.append("<b>").append(Transform.escapeTags(event.getFormattedMessage())).append("</b>");
     stacktrace(event, buffer);
+    systemProperties(buffer);
     buffer.append("</p>");
     return buffer.toString();
   }
-  
+
   String format(long timestamp) {
     return dateFormat.format(new Date(timestamp));
   }
@@ -97,6 +102,37 @@ public class IdobataLayout extends LayoutBase<ILoggingEvent> {
       buffer.append("</code></pre>");
     }
   }
+  
+  Properties getSystemProperties() {
+    return System.getProperties();
+  }
+
+  void systemProperties(StringBuilder buffer) {
+    if (!outputSystemProperties) {
+      return;
+    }
+    Properties properties = getSystemProperties();
+    buffer.append("<table style=\"table-layout: fixed; width: 100%;\">");
+    buffer.append("<caption>System Properties</caption>");
+    buffer.append("<thead>");
+    tableRow(buffer, "key", "value", true);
+    buffer.append("</thead>");
+    buffer.append("<tbody>");
+    Set<String> names = new TreeSet<String>(properties.stringPropertyNames());
+    for (String name : names) {
+      tableRow(buffer, name, properties.getProperty(name), false);
+    }
+    buffer.append("</tbody>");
+    buffer.append("</table>");
+  }
+
+  void tableRow(StringBuilder buffer, String name, String value, boolean header) {
+    String tag = header ? "th" : "td";
+    buffer.append("<tr>");
+    buffer.append("<").append(tag).append(">").append(Transform.escapeTags(name)).append("</").append(tag).append(">");
+    buffer.append("<").append(tag).append(">").append(Transform.escapeTags(value)).append("</").append(tag).append(">");
+    buffer.append("</tr>");
+  }
 
   public DateFormat getDateFormat() {
     return dateFormat;
@@ -105,18 +141,26 @@ public class IdobataLayout extends LayoutBase<ILoggingEvent> {
   public void setDateFormat(DateFormat dateFormat) {
     this.dateFormat = dateFormat;
   }
-  
+
   public void setColor(Level level, String color) {
     if (level == null) {
       throw new IllegalArgumentException("Level must not be null.");
     }
     this.levelToColor.put(level.toInteger(), color);
   }
-  
+
   public void setBackgroundColor(Level level, String color) {
     if (level == null) {
       throw new IllegalArgumentException("Level must not be null.");
     }
     this.levelToBackgroundColor.put(level.toInteger(), color);
+  }
+
+  public boolean isOutputSystemProperties() {
+    return outputSystemProperties;
+  }
+
+  public void setOutputSystemProperties(boolean outputSystemProperties) {
+    this.outputSystemProperties = outputSystemProperties;
   }
 }

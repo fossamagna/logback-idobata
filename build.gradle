@@ -13,8 +13,8 @@ description = 'logback-idobata is simple logback appender for Idobata'
 group = 'com.github.fossamagna'
 version = version
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-ext.sonatypeFullname = project.property("sonatypeFullname")
-ext.sonatypeUsername = project.property("sonatypeUsername")
+ext.sonatypeFullname = validProperty("sonatypeFullname") ? project.property("sonatypeFullname") : null;
+ext.sonatypeUsername = validProperty("sonatypeUsername") ? project.property("sonatypeUsername") : null;
 ext.sonatypePassword = null
 
 jacocoTestReport {

@@ -53,7 +53,6 @@ gradle.taskGraph.whenReady { taskGraph ->
     assert validProperty('signing.secretKeyRingFile'), 'properties for signing must be provided'
     def password = askPassword("Enter password for PGP key ${property('signing.keyId')}: ")
     allprojects { ext."signing.password" = password }
-    allprojects { ext."sonatypePassword" = askPassword("Enter password for ${sonatypeUsername}@oss.sonatype.org: ") }
   }
 }
 
@@ -73,33 +72,41 @@ signing {
 
 ext.repositoryUrl = isReleaseVersion ? 'https://oss.sonatype.org/service/local/staging/deploy/maven2' : 'https://oss.sonatype.org/content/repositories/snapshots'
 
-uploadArchives {
-  repositories.mavenDeployer {
-    repository(url: repositoryUrl) {
-      authentication(userName: sonatypeUsername, password: ext.sonatypePassword)
-    }
-    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-    pom.project {
-      name 'Logback Idobata'
-      packaging 'jar'
-      description project.description
-      url 'https://github.com/fossamagna/logback-idobata'
-      scm {
-        url 'git@github.com:fossamagna/logback-idobata.git'
-        connection 'scm:git:git@github.com:fossamagna/logback-idobata.git'
-        developerConnection 'scm:git:git@github.com:fossamagna/logback-idobata.git'
-      }
-      licenses {
-        license {
-          name 'The Apache Software License, Version 2.0'
-          url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-          distribution 'repo'
+task uploadJars << {
+  ext {
+    sonatypePassword = askPassword("Enter password for ${sonatypeUsername}@oss.sonatype.org: ")
+  }
+
+  allprojects {
+    uploadArchives {
+      repositories.mavenDeployer {
+        repository(url: repositoryUrl) {
+          authentication(userName: sonatypeUsername, password: uploadJars.sonatypePassword)
         }
-      }
-      developers {
-        developer {
-          id sonatypeUsername
-          name sonatypeFullname
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+        pom.project {
+          name 'Logback Idobata'
+          packaging 'jar'
+          description project.description
+          url 'https://github.com/fossamagna/logback-idobata'
+          scm {
+            url 'git@github.com:fossamagna/logback-idobata.git'
+            connection 'scm:git:git@github.com:fossamagna/logback-idobata.git'
+            developerConnection 'scm:git:git@github.com:fossamagna/logback-idobata.git'
+          }
+          licenses {
+            license {
+              name 'The Apache Software License, Version 2.0'
+              url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+              distribution 'repo'
+            }
+          }
+          developers {
+            developer {
+              id sonatypeUsername
+              name sonatypeFullname
+            }
+          }
         }
       }
     }
@@ -126,4 +133,4 @@ task wrapper(type: Wrapper) {
   gradleVersion = '2.12'
 }
 
-afterReleaseBuild.dependsOn uploadArchives
+afterReleaseBuild.dependsOn uploadJars

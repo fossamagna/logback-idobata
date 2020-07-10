@@ -121,7 +121,7 @@ repositories {
 dependencies {
   compile 'ch.qos.logback:logback-core:1.2.3'
   compile 'ch.qos.logback:logback-classic:1.2.3'
-  testCompile ('org.mockito:mockito-core:3.2.0') {
+  testCompile ('org.mockito:mockito-core:3.4.0') {
     exclude module: 'hamcrest-core'
   }
   testCompile ('junit:junit:4.12') {

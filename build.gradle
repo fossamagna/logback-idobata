@@ -124,7 +124,7 @@ dependencies {
   testCompile ('org.mockito:mockito-core:3.5.0') {
     exclude module: 'hamcrest-core'
   }
-  testCompile ('junit:junit:4.13') {
+  testCompile ('junit:junit:4.13.1') {
     exclude module: 'hamcrest-core'
   }
   testCompile 'org.hamcrest:hamcrest-all:1.3'
